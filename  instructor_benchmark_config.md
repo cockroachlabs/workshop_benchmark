@@ -145,6 +145,42 @@ cd ~/git/apache-jmeter-5.2.1/bin
 Notice there are various functions available to use within the code:
 + [jmeter functions](https://jmeter.apache.org/usermanual/functions.html)
 
+### DEMO :: mylogger
+
+```
+create database mylogger;
+use mylogger;
+
+create table mylog1 (
+    id uuid DEFAULT gen_random_uuid(),
+    ts timestamp DEFAULT now(),
+    eventname string,
+    thread int,
+    thread_group string,
+    notes string,
+    primary key (ts, id)
+);
+
+insert into mylog1 (eventname, thread, thread_group, notes ) values ('active', 3, 'ingestGroup', 'ingest rampup');
+
+-- rollup
+create table agglog1 (
+    aggid uuid DEFAULT gen_random_uuid(),
+    ts timestamp DEFAULT now(),
+    day int,
+    month int,
+    year int,
+    hour24 string,
+    min string,
+    eventname string,
+    ecount int,
+    primary key (ts, eventname)
+)
+insert into agglog1
+select eventname, count(*) from mylog as of system time '-15s' where ts > now()::timestamp - INTERVAL '30s' group by 1 order by 1;
+
+```
+
 
 ##  Student Labs
 

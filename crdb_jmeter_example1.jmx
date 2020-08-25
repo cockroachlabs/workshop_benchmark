@@ -16,7 +16,7 @@
         <stringProp name="checkQuery">Select 1</stringProp>
         <stringProp name="connectionAge">5000</stringProp>
         <stringProp name="dataSource">central</stringProp>
-        <stringProp name="dbUrl">jdbc:postgresql://${__P(eastcrdb,127.0.0.1:26257)}/jtest?autoReconnect=true&amp;sslmode=disable&amp;ssl=false&amp;ApplicationName=JM_app1</stringProp>
+        <stringProp name="dbUrl">jdbc:postgresql://${__P(eastcrdb,127.0.0.1:26257)}/mylogger?autoReconnect=true&amp;sslmode=disable&amp;ssl=false&amp;ApplicationName=JM_app1</stringProp>
         <stringProp name="driver">org.postgresql.Driver</stringProp>
         <boolProp name="keepAlive">true</boolProp>
         <stringProp name="password"></stringProp>
@@ -179,11 +179,7 @@
         <stringProp name="filename"></stringProp>
       </ResultCollector>
       <hashTree/>
-      <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="false">
-        <stringProp name="ConstantTimer.delay">300</stringProp>
-      </ConstantTimer>
-      <hashTree/>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="MicroService1_Dashboard" enabled="true">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="MicroService0_Ping" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
@@ -191,8 +187,44 @@
         </elementProp>
         <stringProp name="ThreadGroup.num_threads">1</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
-        <boolProp name="ThreadGroup.scheduler">true</boolProp>
-        <stringProp name="ThreadGroup.duration">120</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration">3600</stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+        <stringProp name="TestPlan.comments">Dashboard Rollup</stringProp>
+      </ThreadGroup>
+      <hashTree>
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="test" enabled="true">
+          <stringProp name="dataSource">central</stringProp>
+          <stringProp name="queryType">Callable Statement</stringProp>
+          <stringProp name="query">SELECT ${__threadNum}, ${__intSum(2,threadNum)}, ${__Random(0,1000)}, now();
+</stringProp>
+          <stringProp name="queryArguments"></stringProp>
+          <stringProp name="queryArgumentsTypes"></stringProp>
+          <stringProp name="variableNames"></stringProp>
+          <stringProp name="resultVariable"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+          <stringProp name="TestPlan.comments">Uses variables in jmeter to test simple select</stringProp>
+        </JDBCSampler>
+        <hashTree>
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+            <stringProp name="ConstantTimer.delay">2000</stringProp>
+          </ConstantTimer>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="MicroService1_Dashboard" enabled="false">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">1</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">false</boolProp>
+        <stringProp name="ThreadGroup.duration">3600</stringProp>
         <stringProp name="ThreadGroup.delay"></stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
         <stringProp name="TestPlan.comments">Dashboard Rollup</stringProp>
@@ -201,9 +233,109 @@
         <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Populate Dashboard" enabled="true">
           <stringProp name="dataSource">central</stringProp>
           <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="query">SELECT ${__threadNum}, ${__intSum(2,threadNum)}, ${__Random(0,1000)};
+          <stringProp name="query">SELECT ${__threadNum}, ${__intSum(2,threadNum)}, ${__Random(0,1000)}, now();
+
+--BEGIN;
+
+--SET TRANSACTION PRIORITY HIGH;
+--SET TRANSACTION AS OF SYSTEM TIME &apos;-10s&apos;;
+--SET TRANSACTION AS OF SYSTEM TIME experimental_follower_read_timestamp();
+
+--SELECT * FROM alerts WHERE customer_id=6;
+--SELECT COUNT(*) from alerts;
+
+--SELECT COUNT(*) from alerts;
+
+--COMMIT;
 --        ${__Random(0,1000)}, 
 --     VALUES (${__intSum(2,threadNum)}, ${__threadNum}, &apos;DT&apos;, 4.29) </stringProp>
+          <stringProp name="queryArguments"></stringProp>
+          <stringProp name="queryArgumentsTypes"></stringProp>
+          <stringProp name="variableNames"></stringProp>
+          <stringProp name="resultVariable"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+        </JDBCSampler>
+        <hashTree>
+          <ConstantTimer guiclass="ConstantTimerGui" testclass="ConstantTimer" testname="Constant Timer" enabled="true">
+            <stringProp name="ConstantTimer.delay">10000</stringProp>
+          </ConstantTimer>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="MicroService2_Ingest_Single" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">8</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">120</stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="insert single" enabled="true">
+          <stringProp name="dataSource">central</stringProp>
+          <stringProp name="queryType">Callable Statement</stringProp>
+          <stringProp name="query">--insert into mylogger (eventname) values (&apos;single&apos;);
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;online&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_online&apos; ));
+</stringProp>
+          <stringProp name="queryArguments"></stringProp>
+          <stringProp name="queryArgumentsTypes"></stringProp>
+          <stringProp name="variableNames"></stringProp>
+          <stringProp name="resultVariable"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+        </JDBCSampler>
+        <hashTree>
+          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="true">
+            <doubleProp>
+              <name>allowedThroughputSurplus</name>
+              <value>1.0</value>
+              <savedValue>0.0</savedValue>
+            </doubleProp>
+            <intProp name="batchSize">4</intProp>
+            <intProp name="batchThreadDelay">0</intProp>
+            <longProp name="duration">100</longProp>
+            <intProp name="exactLimit">10000</intProp>
+            <longProp name="randomSeed">0</longProp>
+            <doubleProp>
+              <name>throughput</name>
+              <value>10.0</value>
+              <savedValue>0.0</savedValue>
+            </doubleProp>
+            <intProp name="throughputPeriod">1</intProp>
+          </PreciseThroughputTimer>
+          <hashTree/>
+        </hashTree>
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="insert multiple statements" enabled="false">
+          <stringProp name="dataSource">central</stringProp>
+          <stringProp name="queryType">Callable Statement</stringProp>
+          <stringProp name="query">BEGIN;
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;online&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_online&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;offline&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_offline&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;fault&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_fault&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;error&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_error&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;flush&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_flush&apos; ));
+
+COMMIT;</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
@@ -221,81 +353,28 @@
             </doubleProp>
             <intProp name="batchSize">1</intProp>
             <intProp name="batchThreadDelay">0</intProp>
-            <longProp name="duration">1000</longProp>
-            <intProp name="exactLimit">10</intProp>
+            <longProp name="duration">100</longProp>
+            <intProp name="exactLimit">10000</intProp>
             <longProp name="randomSeed">0</longProp>
             <doubleProp>
               <name>throughput</name>
-              <value>1.0</value>
+              <value>10.0</value>
               <savedValue>0.0</savedValue>
             </doubleProp>
             <intProp name="throughputPeriod">10</intProp>
           </PreciseThroughputTimer>
           <hashTree/>
         </hashTree>
-        <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Throughput Controller" enabled="false">
-          <intProp name="ThroughputController.style">0</intProp>
-          <boolProp name="ThroughputController.perThread">true</boolProp>
-          <intProp name="ThroughputController.maxThroughput">1</intProp>
-          <FloatProperty>
-            <name>ThroughputController.percentThroughput</name>
-            <value>1.0</value>
-            <savedValue>0.0</savedValue>
-          </FloatProperty>
-          <stringProp name="TestPlan.comments">1 tps for production</stringProp>
-        </ThroughputController>
-        <hashTree>
-          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Populate Dashboard" enabled="false">
-            <stringProp name="dataSource">central</stringProp>
-            <stringProp name="queryType">Callable Statement</stringProp>
-            <stringProp name="query">SELECT ${__threadNum}, ${__intSum(2,threadNum)}, ${__Random(0,1000)};
---        ${__Random(0,1000)}, 
---     VALUES (${__intSum(2,threadNum)}, ${__threadNum}, &apos;DT&apos;, 4.29) </stringProp>
-            <stringProp name="queryArguments"></stringProp>
-            <stringProp name="queryArgumentsTypes"></stringProp>
-            <stringProp name="variableNames"></stringProp>
-            <stringProp name="resultVariable"></stringProp>
-            <stringProp name="queryTimeout"></stringProp>
-            <stringProp name="resultSetHandler">Store as String</stringProp>
-            <stringProp name="resultSetMaxRows"></stringProp>
-          </JDBCSampler>
-          <hashTree>
-            <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="false">
-              <doubleProp>
-                <name>allowedThroughputSurplus</name>
-                <value>1.0</value>
-                <savedValue>0.0</savedValue>
-              </doubleProp>
-              <intProp name="batchSize">1</intProp>
-              <intProp name="batchThreadDelay">0</intProp>
-              <longProp name="duration">100</longProp>
-              <intProp name="exactLimit">100</intProp>
-              <longProp name="randomSeed">0</longProp>
-              <doubleProp>
-                <name>throughput</name>
-                <value>1.0</value>
-                <savedValue>0.0</savedValue>
-              </doubleProp>
-              <intProp name="throughputPeriod">1</intProp>
-            </PreciseThroughputTimer>
-            <hashTree/>
-          </hashTree>
-        </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="select_high" enabled="false">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="insert multiple values" enabled="false">
           <stringProp name="dataSource">central</stringProp>
           <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="query">BEGIN;
-
-SET TRANSACTION PRIORITY HIGH;
---SET TRANSACTION AS OF SYSTEM TIME &apos;-10s&apos;;
---SET TRANSACTION AS OF SYSTEM TIME experimental_follower_read_timestamp();
-
---SELECT * FROM alerts WHERE customer_id=6;
---SELECT COUNT(*) from alerts;
-
-SELECT COUNT(*) from alerts;
-
-COMMIT;</stringProp>
+          <stringProp name="query">insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;online&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_online&apos; )),
+       (&apos;offline&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_offline&apos; )),
+       (&apos;fault&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_fault&apos; )),
+       (&apos;error&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_error&apos; )),
+       (&apos;flush&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_flush&apos; ));
+</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
@@ -305,110 +384,34 @@ COMMIT;</stringProp>
           <stringProp name="resultSetMaxRows"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="false">
+          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="true">
             <doubleProp>
               <name>allowedThroughputSurplus</name>
               <value>1.0</value>
               <savedValue>0.0</savedValue>
             </doubleProp>
-            <intProp name="batchSize">3</intProp>
+            <intProp name="batchSize">1</intProp>
             <intProp name="batchThreadDelay">0</intProp>
             <longProp name="duration">100</longProp>
             <intProp name="exactLimit">10000</intProp>
             <longProp name="randomSeed">0</longProp>
             <doubleProp>
               <name>throughput</name>
-              <value>10000.0</value>
+              <value>10.0</value>
               <savedValue>0.0</savedValue>
             </doubleProp>
-            <intProp name="throughputPeriod">100</intProp>
-          </PreciseThroughputTimer>
-          <hashTree/>
-        </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="select_low" enabled="false">
-          <stringProp name="dataSource">central</stringProp>
-          <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="query">BEGIN;
-
-SET TRANSACTION PRIORITY LOW;
-SELECT * FROM alerts WHERE customer_id=6;
-
-COMMIT;</stringProp>
-          <stringProp name="queryArguments"></stringProp>
-          <stringProp name="queryArgumentsTypes"></stringProp>
-          <stringProp name="variableNames"></stringProp>
-          <stringProp name="resultVariable"></stringProp>
-          <stringProp name="queryTimeout"></stringProp>
-          <stringProp name="resultSetHandler">Store as String</stringProp>
-          <stringProp name="resultSetMaxRows"></stringProp>
-        </JDBCSampler>
-        <hashTree>
-          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="false">
-            <doubleProp>
-              <name>allowedThroughputSurplus</name>
-              <value>1.0</value>
-              <savedValue>0.0</savedValue>
-            </doubleProp>
-            <intProp name="batchSize">3</intProp>
-            <intProp name="batchThreadDelay">0</intProp>
-            <longProp name="duration">100</longProp>
-            <intProp name="exactLimit">10000</intProp>
-            <longProp name="randomSeed">0</longProp>
-            <doubleProp>
-              <name>throughput</name>
-              <value>10000.0</value>
-              <savedValue>0.0</savedValue>
-            </doubleProp>
-            <intProp name="throughputPeriod">100</intProp>
-          </PreciseThroughputTimer>
-          <hashTree/>
-        </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="select_normal" enabled="false">
-          <stringProp name="dataSource">central</stringProp>
-          <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="query">BEGIN;
-
---SET TRANSACTION PRIORITY NORMAL;
-SELECT * FROM alerts WHERE customer_id=6;
-
-COMMIT;</stringProp>
-          <stringProp name="queryArguments"></stringProp>
-          <stringProp name="queryArgumentsTypes"></stringProp>
-          <stringProp name="variableNames"></stringProp>
-          <stringProp name="resultVariable"></stringProp>
-          <stringProp name="queryTimeout"></stringProp>
-          <stringProp name="resultSetHandler">Store as String</stringProp>
-          <stringProp name="resultSetMaxRows"></stringProp>
-        </JDBCSampler>
-        <hashTree>
-          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="false">
-            <doubleProp>
-              <name>allowedThroughputSurplus</name>
-              <value>1.0</value>
-              <savedValue>0.0</savedValue>
-            </doubleProp>
-            <intProp name="batchSize">3</intProp>
-            <intProp name="batchThreadDelay">0</intProp>
-            <longProp name="duration">100</longProp>
-            <intProp name="exactLimit">10000</intProp>
-            <longProp name="randomSeed">0</longProp>
-            <doubleProp>
-              <name>throughput</name>
-              <value>10000.0</value>
-              <savedValue>0.0</savedValue>
-            </doubleProp>
-            <intProp name="throughputPeriod">100</intProp>
+            <intProp name="throughputPeriod">10</intProp>
           </PreciseThroughputTimer>
           <hashTree/>
         </hashTree>
       </hashTree>
-      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="MicroService2_Ingest1" enabled="false">
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="MicroService3_Ingest_Multi_Statement" enabled="true">
         <stringProp name="ThreadGroup.on_sample_error">continue</stringProp>
         <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
           <boolProp name="LoopController.continue_forever">false</boolProp>
           <intProp name="LoopController.loops">-1</intProp>
         </elementProp>
-        <stringProp name="ThreadGroup.num_threads">4</stringProp>
+        <stringProp name="ThreadGroup.num_threads">8</stringProp>
         <stringProp name="ThreadGroup.ramp_time">1</stringProp>
         <boolProp name="ThreadGroup.scheduler">true</boolProp>
         <stringProp name="ThreadGroup.duration">120</stringProp>
@@ -416,98 +419,14 @@ COMMIT;</stringProp>
         <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
       </ThreadGroup>
       <hashTree>
-        <ThroughputController guiclass="ThroughputControllerGui" testclass="ThroughputController" testname="Throughput Controller" enabled="true">
-          <intProp name="ThroughputController.style">1</intProp>
-          <boolProp name="ThroughputController.perThread">false</boolProp>
-          <intProp name="ThroughputController.maxThroughput">100</intProp>
-          <FloatProperty>
-            <name>ThroughputController.percentThroughput</name>
-            <value>10.0</value>
-            <savedValue>0.0</savedValue>
-          </FloatProperty>
-          <stringProp name="TestPlan.comments">416 tps for production</stringProp>
-        </ThroughputController>
-        <hashTree>
-          <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="Populate Dashboard" enabled="true">
-            <stringProp name="dataSource">central</stringProp>
-            <stringProp name="queryType">Callable Statement</stringProp>
-            <stringProp name="query">WITH tt1 AS 
-(
-    INSERT INTO Transactions (acct_id, mer_id, creat_dt, trans_usd_am)
-    VALUES (${__threadNum}, ${__threadNum}, &apos;DT&apos;, 4.29)
-      RETURNING (trans_acqr_refer_no), 
-                            (acct_id), 
-                             (mer_id), 
-                           (creat_ts), 
-                           (creat_dt),
-                       (trans_usd_am)
-), 
-tt2 AS (
-    INSERT INTO Transactions2
-    SELECT tt1.trans_acqr_refer_no, tt1.acct_id, tt1.mer_id, tt1.creat_ts, tt1.creat_dt, tt1.trans_usd_am 
-    FROM tt1
-    RETURNING (trans_acqr_refer_no), 
-                            (acct_id), 
-                             (mer_id), 
-                           (creat_ts), 
-                           (creat_dt),
-                       (trans_usd_am)      
-),
-ms3 as (
-INSERT INTO MerchantCMDailySpend(mer_id, acct_id, creat_dt, tot_trans_usd_am, creat_ts) 
-SELECT tt2.mer_id, tt2.acct_id, tt2.creat_dt, tt2.trans_usd_am, tt2.creat_ts
-FROM tt2
-  ON CONFLICT (mer_id, acct_id, creat_dt) 
-  DO UPDATE SET 
-    tot_trans_usd_am = MerchantCMDailySpend.tot_trans_usd_am + excluded.tot_trans_usd_am,
-    tot_trans_ct = MerchantCMDailySpend.tot_trans_ct + 1
-  RETURNING        (acct_id), 
-                  (creat_dt),
-          (tot_trans_usd_am), 
-                  (creat_ts)
-)
-INSERT INTO CMDailySpend (acct_id, creat_dt, tot_trans_usd_am, creat_ts) 
-SELECT ms3.acct_id, ms3.creat_dt, ms3.tot_trans_usd_am, ms3.creat_ts
-FROM ms3
-ON CONFLICT (acct_id, creat_dt) 
-  DO UPDATE SET 
-    tot_trans_usd_am = CMDailySpend.tot_trans_usd_am + excluded.tot_trans_usd_am, 
-    tot_trans_ct = CMDailySpend.tot_trans_ct + 1;
---        ${__Random(0,1000)}, 
---     VALUES (${__intSum(2,threadNum)}, ${__threadNum}, &apos;DT&apos;, 4.29) </stringProp>
-            <stringProp name="queryArguments"></stringProp>
-            <stringProp name="queryArgumentsTypes"></stringProp>
-            <stringProp name="variableNames"></stringProp>
-            <stringProp name="resultVariable"></stringProp>
-            <stringProp name="queryTimeout"></stringProp>
-            <stringProp name="resultSetHandler">Store as String</stringProp>
-            <stringProp name="resultSetMaxRows"></stringProp>
-          </JDBCSampler>
-          <hashTree/>
-        </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="update_low" enabled="false">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="insert single" enabled="false">
           <stringProp name="dataSource">central</stringProp>
           <stringProp name="queryType">Callable Statement</stringProp>
-          <stringProp name="query">BEGIN;
+          <stringProp name="query">--insert into mylogger (eventname) values (&apos;single&apos;);
 
-SET TRANSACTION PRIORITY LOW;
---update alerts set cstatus=cstatus, updated_at=now() WHERE id=317;
---
----- MAYBE TRY CTE with Sleep to see if it repo&apos;s?
---select pg_sleep(5);
-
-with uac as (
-    update alerts set cstatus=cstatus, updated_at=now() WHERE id=317
-    RETURNING (cstatus)    
-),
-slp as (
-    select pg_sleep(1)
-)
-select cstatus 
-from uac
-join slp on (1=1);
-
-COMMIT;</stringProp>
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;online&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_online&apos; ));
+</stringProp>
           <stringProp name="queryArguments"></stringProp>
           <stringProp name="queryArgumentsTypes"></stringProp>
           <stringProp name="variableNames"></stringProp>
@@ -517,34 +436,45 @@ COMMIT;</stringProp>
           <stringProp name="resultSetMaxRows"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="false">
+          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="true">
             <doubleProp>
               <name>allowedThroughputSurplus</name>
               <value>1.0</value>
-              <savedValue>0.0</savedValue>
+              <savedValue>1.0</savedValue>
             </doubleProp>
-            <intProp name="batchSize">3</intProp>
+            <intProp name="batchSize">4</intProp>
             <intProp name="batchThreadDelay">0</intProp>
             <longProp name="duration">100</longProp>
             <intProp name="exactLimit">10000</intProp>
             <longProp name="randomSeed">0</longProp>
             <doubleProp>
               <name>throughput</name>
-              <value>2000.0</value>
-              <savedValue>0.0</savedValue>
+              <value>10.0</value>
+              <savedValue>10.0</savedValue>
             </doubleProp>
-            <intProp name="throughputPeriod">100</intProp>
+            <intProp name="throughputPeriod">1</intProp>
           </PreciseThroughputTimer>
           <hashTree/>
         </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="update_high" enabled="false">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="insert multiple statements" enabled="true">
           <stringProp name="dataSource">central</stringProp>
           <stringProp name="queryType">Callable Statement</stringProp>
           <stringProp name="query">BEGIN;
 
-SET TRANSACTION PRIORITY HIGH;
-update alerts set cstatus=cstatus, updated_at=now() WHERE id=317;
-select pg_sleep(5);
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;online&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_online&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;offline&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_offline&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;fault&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_fault&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;error&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_error&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;flush&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_flush&apos; ));
 
 COMMIT;</stringProp>
           <stringProp name="queryArguments"></stringProp>
@@ -562,27 +492,130 @@ COMMIT;</stringProp>
               <value>1.0</value>
               <savedValue>0.0</savedValue>
             </doubleProp>
-            <intProp name="batchSize">3</intProp>
+            <intProp name="batchSize">1</intProp>
             <intProp name="batchThreadDelay">0</intProp>
             <longProp name="duration">100</longProp>
             <intProp name="exactLimit">10000</intProp>
             <longProp name="randomSeed">0</longProp>
             <doubleProp>
               <name>throughput</name>
-              <value>2000.0</value>
+              <value>10.0</value>
               <savedValue>0.0</savedValue>
             </doubleProp>
-            <intProp name="throughputPeriod">100</intProp>
+            <intProp name="throughputPeriod">5</intProp>
           </PreciseThroughputTimer>
           <hashTree/>
         </hashTree>
-        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="update_normal" enabled="false">
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="insert multiple values" enabled="false">
+          <stringProp name="dataSource">central</stringProp>
+          <stringProp name="queryType">Callable Statement</stringProp>
+          <stringProp name="query">insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;online&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_online&apos; )),
+       (&apos;offline&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_offline&apos; )),
+       (&apos;fault&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_fault&apos; )),
+       (&apos;error&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_error&apos; )),
+       (&apos;flush&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_flush&apos; ));
+</stringProp>
+          <stringProp name="queryArguments"></stringProp>
+          <stringProp name="queryArgumentsTypes"></stringProp>
+          <stringProp name="variableNames"></stringProp>
+          <stringProp name="resultVariable"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+        </JDBCSampler>
+        <hashTree>
+          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="true">
+            <doubleProp>
+              <name>allowedThroughputSurplus</name>
+              <value>1.0</value>
+              <savedValue>1.0</savedValue>
+            </doubleProp>
+            <intProp name="batchSize">1</intProp>
+            <intProp name="batchThreadDelay">0</intProp>
+            <longProp name="duration">100</longProp>
+            <intProp name="exactLimit">10000</intProp>
+            <longProp name="randomSeed">0</longProp>
+            <doubleProp>
+              <name>throughput</name>
+              <value>10.0</value>
+              <savedValue>10.0</savedValue>
+            </doubleProp>
+            <intProp name="throughputPeriod">10</intProp>
+          </PreciseThroughputTimer>
+          <hashTree/>
+        </hashTree>
+      </hashTree>
+      <ThreadGroup guiclass="ThreadGroupGui" testclass="ThreadGroup" testname="MicroService4_Ingest_Multi_value" enabled="true">
+        <stringProp name="ThreadGroup.on_sample_error">startnextloop</stringProp>
+        <elementProp name="ThreadGroup.main_controller" elementType="LoopController" guiclass="LoopControlPanel" testclass="LoopController" testname="Loop Controller" enabled="true">
+          <boolProp name="LoopController.continue_forever">false</boolProp>
+          <intProp name="LoopController.loops">-1</intProp>
+        </elementProp>
+        <stringProp name="ThreadGroup.num_threads">8</stringProp>
+        <stringProp name="ThreadGroup.ramp_time">1</stringProp>
+        <boolProp name="ThreadGroup.scheduler">true</boolProp>
+        <stringProp name="ThreadGroup.duration">120</stringProp>
+        <stringProp name="ThreadGroup.delay"></stringProp>
+        <boolProp name="ThreadGroup.same_user_on_next_iteration">true</boolProp>
+      </ThreadGroup>
+      <hashTree>
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="insert single" enabled="false">
+          <stringProp name="dataSource">central</stringProp>
+          <stringProp name="queryType">Callable Statement</stringProp>
+          <stringProp name="query">--insert into mylogger (eventname) values (&apos;single&apos;);
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;online&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_online&apos; ));
+</stringProp>
+          <stringProp name="queryArguments"></stringProp>
+          <stringProp name="queryArgumentsTypes"></stringProp>
+          <stringProp name="variableNames"></stringProp>
+          <stringProp name="resultVariable"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+        </JDBCSampler>
+        <hashTree>
+          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="true">
+            <doubleProp>
+              <name>allowedThroughputSurplus</name>
+              <value>1.0</value>
+              <savedValue>1.0</savedValue>
+            </doubleProp>
+            <intProp name="batchSize">4</intProp>
+            <intProp name="batchThreadDelay">0</intProp>
+            <longProp name="duration">100</longProp>
+            <intProp name="exactLimit">10000</intProp>
+            <longProp name="randomSeed">0</longProp>
+            <doubleProp>
+              <name>throughput</name>
+              <value>10.0</value>
+              <savedValue>10.0</savedValue>
+            </doubleProp>
+            <intProp name="throughputPeriod">1</intProp>
+          </PreciseThroughputTimer>
+          <hashTree/>
+        </hashTree>
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="insert multiple statements" enabled="false">
           <stringProp name="dataSource">central</stringProp>
           <stringProp name="queryType">Callable Statement</stringProp>
           <stringProp name="query">BEGIN;
 
---SET TRANSACTION PRIORITY NORMAL;
-update alerts set cstatus=cstatus, updated_at=now() WHERE id=317;
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;online&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_online&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;offline&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_offline&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;fault&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_fault&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;error&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_error&apos; ));
+
+insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;flush&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_flush&apos; ));
 
 COMMIT;</stringProp>
           <stringProp name="queryArguments"></stringProp>
@@ -594,23 +627,62 @@ COMMIT;</stringProp>
           <stringProp name="resultSetMaxRows"></stringProp>
         </JDBCSampler>
         <hashTree>
-          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="false">
+          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="true">
             <doubleProp>
               <name>allowedThroughputSurplus</name>
               <value>1.0</value>
-              <savedValue>0.0</savedValue>
+              <savedValue>1.0</savedValue>
             </doubleProp>
-            <intProp name="batchSize">3</intProp>
+            <intProp name="batchSize">1</intProp>
             <intProp name="batchThreadDelay">0</intProp>
             <longProp name="duration">100</longProp>
             <intProp name="exactLimit">10000</intProp>
             <longProp name="randomSeed">0</longProp>
             <doubleProp>
               <name>throughput</name>
-              <value>2000.0</value>
+              <value>10.0</value>
+              <savedValue>10.0</savedValue>
+            </doubleProp>
+            <intProp name="throughputPeriod">10</intProp>
+          </PreciseThroughputTimer>
+          <hashTree/>
+        </hashTree>
+        <JDBCSampler guiclass="TestBeanGUI" testclass="JDBCSampler" testname="insert multiple values" enabled="true">
+          <stringProp name="dataSource">central</stringProp>
+          <stringProp name="queryType">Callable Statement</stringProp>
+          <stringProp name="query">insert into mylog1 (eventname, thread, thread_group, notes) 
+values (&apos;online&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_online&apos; )),
+       (&apos;offline&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_offline&apos; )),
+       (&apos;fault&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_fault&apos; )),
+       (&apos;error&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_error&apos; )),
+       (&apos;flush&apos;, ${__threadNum}, &apos;${__threadGroupName}&apos;, concat(&apos;${__threadGroupName}&apos;,&apos;_&apos;,&apos;${__threadNum}&apos;,&apos;_flush&apos; ));
+</stringProp>
+          <stringProp name="queryArguments"></stringProp>
+          <stringProp name="queryArgumentsTypes"></stringProp>
+          <stringProp name="variableNames"></stringProp>
+          <stringProp name="resultVariable"></stringProp>
+          <stringProp name="queryTimeout"></stringProp>
+          <stringProp name="resultSetHandler">Store as String</stringProp>
+          <stringProp name="resultSetMaxRows"></stringProp>
+        </JDBCSampler>
+        <hashTree>
+          <PreciseThroughputTimer guiclass="TestBeanGUI" testclass="PreciseThroughputTimer" testname="Precise Throughput Timer" enabled="true">
+            <doubleProp>
+              <name>allowedThroughputSurplus</name>
+              <value>1.0</value>
               <savedValue>0.0</savedValue>
             </doubleProp>
-            <intProp name="throughputPeriod">100</intProp>
+            <intProp name="batchSize">1</intProp>
+            <intProp name="batchThreadDelay">0</intProp>
+            <longProp name="duration">100</longProp>
+            <intProp name="exactLimit">10000</intProp>
+            <longProp name="randomSeed">0</longProp>
+            <doubleProp>
+              <name>throughput</name>
+              <value>10.0</value>
+              <savedValue>0.0</savedValue>
+            </doubleProp>
+            <intProp name="throughputPeriod">5</intProp>
           </PreciseThroughputTimer>
           <hashTree/>
         </hashTree>
