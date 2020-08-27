@@ -30,6 +30,7 @@
 --CockroachDB defaults to UTC time zone
 --This ensures jmeter is using UTC</stringProp>
         <stringProp name="connectionProperties"></stringProp>
+        <stringProp name="TestPlan.comments">Multiple Pools are possible</stringProp>
       </JDBCDataSource>
       <hashTree/>
       <ResultCollector guiclass="SummaryReport" testclass="ResultCollector" testname="Summary Report" enabled="true">
