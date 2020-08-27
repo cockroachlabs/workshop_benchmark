@@ -286,5 +286,11 @@ create table mylog1 (
 ./workload run querybench --query-file b10_query.sql --db mybench_b10 --duration 120s --concurrency 2
 ./workload run querybench --query-file b10_query.sql --db mybench_b10 --duration 120s --concurrency 4
 
+for d in 1 2 3 4 5 
+do 
+  #roachprod ssh glenn-bcluster${d}:1 "./cockroach sql --insecure --execute 'drop database if exists tpcc${d} cascade'"
+  roachprod ssh glenn-bcluster${d}:1 "./cockroach sql --insecure --execute \"restore database tpcc from 'gs://querylabs/backup_lab1'\" "
+done 
 
 ```
+
