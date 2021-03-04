@@ -5,8 +5,8 @@ This workshop will have some demo's to show the technique for benchmarking Cockr
 ## Demo creation
 
 ```
-roachprod create glenn-bench --gce-machine-type 'n1-standard-16' --nodes 9 --lifetime 132h
-roachprod stage glenn-bench release v20.1.4
+roachprod create glenn-bench --gce-machine-type 'n1-standard-16' --nodes 9 --lifetime 48h
+roachprod stage glenn-bench release v20.2.5
 roachprod start glenn-bench
 roachprod pgurl glenn-bench:1
 roachprod adminurl glenn-bench:1
@@ -14,14 +14,14 @@ roachprod adminurl glenn-bench:1
 
 ## -- configure driver machine
 ##
-roachprod create glenn-drive -n 1 --lifetime 168h
-roachprod stage glenn-drive release v20.1.4
+roachprod create glenn-drive -n 1 --lifetime 48h
+roachprod stage glenn-drive release v20.2.5
 roachprod ssh glenn-drive:1
 sudo mv ./cockroach /usr/local/bin
 
 sudo apt-get update -y
 sudo apt-get install haproxy -y
-cockroach gen haproxy --insecure   --host=10.142.0.26   --port=26257 
+cockroach gen haproxy --insecure   --host=10.142.0.3   --port=26257 
 nohup haproxy -f haproxy.cfg &
 
 ## Test connectivity
@@ -65,8 +65,8 @@ cockroach workload run ycsb --workload F --concurrency 36 --duration 300s
 ## Download workload binary if needed
 wget https://edge-binaries.cockroachdb.com/cockroach/workload.LATEST
 chmod 755 workload.LATEST
-cp -i workload.LATEST /usr/local/bin/workload
-chmod u+x /usr/local/bin/workload
+sudo cp -i workload.LATEST /usr/local/bin/workload
+sudo chmod u+x /usr/local/bin/workload
 ```
 
 Create simple schema to test logging function:
