@@ -5,18 +5,17 @@ This workshop will have some demo's to show the technique for benchmarking Cockr
 ## Demo creation
 
 ```
-roachprod create glenn-bench --gce-machine-type 'n1-standard-16' --nodes 9 --lifetime 48h
-roachprod stage glenn-bench release v20.2.5
-roachprod start glenn-bench
-roachprod pgurl glenn-bench:1
-roachprod adminurl glenn-bench:1
-        http://glenn-bench-0001.roachprod.crdb.io:26258/
+roachprod create ${USER:0:6}-bench --gce-machine-type 'n1-standard-16' --nodes 9 --lifetime 48h
+roachprod stage ${USER:0:6}-bench release v21.2.5
+roachprod start ${USER:0:6}-bench
+roachprod pgurl ${USER:0:6}-bench:1
+roachprod adminurl ${USER:0:6}-bench:1
 
 ## -- configure driver machine
 ##
-roachprod create glenn-drive -n 1 --lifetime 48h
-roachprod stage glenn-drive release v20.2.5
-roachprod ssh glenn-drive:1
+roachprod create ${USER:0:6}-drive -n 1 --lifetime 48h
+roachprod stage ${USER:0:6}-drive release v21.2.5
+roachprod ssh ${USER:0:6}-drive:1
 sudo mv ./cockroach /usr/local/bin
 
 sudo apt-get update -y
@@ -74,7 +73,7 @@ Create simple schema to test logging function:
 create database mybench_b1;
 use mybench_b1;
 
-create table mylog_b1 (
+create table mylog_b1(
     id uuid DEFAULT gen_random_uuid() primary key,
     ts timestamp DEFAULT now(),
     eventname string
@@ -95,12 +94,12 @@ create table mylog_b10 (
 
 Query ran by `b1_query.sql`
 ```sql
-insert into mylog (eventname) select 'b1' from generate_series(1,1);
+insert into mylog_b1 (eventname) select 'b1' from generate_series(1,1);
 ```
 
 Query ran by `b10_query.sql`
 ```sql
-insert into mylog (eventname) select 'b10' from generate_series(1,10);
+insert into mylog_b10 (eventname) select 'b10' from generate_series(1,10);
 ```
 
 ### Quick scale up Ingest to find > 10k rows/second
@@ -126,7 +125,7 @@ Install Java and get jmeter binary:
 #apt install openjdk-9-jre-headless
 sudo apt-get update
 sudo apt install default-jre
-wget https://apache.cs.utah.edu//jmeter/binaries/apache-jmeter-5.2.1.tgz
+wget https://dlcdn.apache.org//jmeter/binaries/apache-jmeter-5.4.3.tgz
 ```
 
 Place the `postgresql` driver into the JMeter lib directory:
@@ -183,7 +182,6 @@ from lastEvents
 group by 1;
 
 ```
-
 
 ##  Student Labs
 
